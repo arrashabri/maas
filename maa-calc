@@ -1,0 +1,45 @@
+import streamlit as st
+
+def parse_time_input(time_str):
+    """Convert a time string in 'hh:mm' format to minutes."""
+    try:
+        hours, minutes = map(int, time_str.split(":"))
+        return hours * 60 + minutes
+    except ValueError:
+        return None
+
+def format_minutes(minutes):
+    """Convert minutes into a 'hh:mm' format string."""
+    hours = minutes // 60
+    minutes %= 60
+    return f"{hours:02d}:{minutes:02d}"
+
+st.title("Workday Time Tracker")
+
+workday_type = st.radio(
+    "Select Workday Type:",
+    ("Short Day (9:00)", "Long Day (9:30)")
+)
+
+# Set initial workday duration
+if workday_type == "Short Day (9:00)":
+    total_minutes = 9 * 60  # 9 hours
+else:
+    total_minutes = 9 * 60 + 30  # 9 hours 30 minutes
+
+lunch_minutes = 30
+remaining_minutes = total_minutes - lunch_minutes
+st.write(f"A 30-minute lunch break has been subtracted.")
+st.write(f"Remaining Workday Duration: **{format_minutes(remaining_minutes)}**")
+
+# Subtract time increments
+increment = st.text_input("Enter Time Increment (hh:mm):")
+if st.button("Subtract"):
+    increment_minutes = parse_time_input(increment)
+    if increment_minutes is None:
+        st.error("Invalid input. Please enter time in 'hh:mm' format.")
+    else:
+        if increment_minutes > remaining_minutes:
+            st.warning("Time increment exceeds remaining time!")
+        remaining_minutes = max(0, remaining_minutes - increment_minutes)
+        st.write(f"Remaining Workday Duration: **{format_minutes(remaining_minutes)}**")
